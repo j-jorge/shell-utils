@@ -310,6 +310,15 @@ extract_parameters ()
     done
 }
 
+check_option_is_set()
+{
+    if [ -z "$2" ]
+    then
+        printf "%s: %s is not set. See --help for details.\n" "$0" "$1" >&2
+        exit 1
+    fi
+}
+
 do_option_help ()
 {
     print_help

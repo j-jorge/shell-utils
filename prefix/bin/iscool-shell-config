@@ -1,0 +1,23 @@
+#!/bin/bash
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/options.sh"
+
+print_shell_include()
+{
+    echo "$INCLUDE_ROOT/share/iscoolentertainment/shell"
+}
+
+register_option '--shell-include' print_shell_include \
+                "Prints the path to the directory containing the shell scripts."
+
+print_cmake_modules()
+{
+    echo "$INCLUDE_ROOT/share/iscoolentertainment/cmake"
+}
+
+register_option '--cmake-modules' print_cmake_modules \
+                "Prints the path to the directory containing the CMake modules."
+
+extract_parameters "$@"

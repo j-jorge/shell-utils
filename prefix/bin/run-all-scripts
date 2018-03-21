@@ -1,0 +1,42 @@
+#!/bin/bash
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/colors.sh"
+
+if [ "$1" = "--help" ]
+then
+    printf "Usage: %s directory\n" "$0"
+    exit 0
+fi
+
+if [ ! -d "$1" ]
+then
+    printf "error: '%s' is not a directory.\n" "$1" >&2
+    exit 1
+fi
+
+cd "$1" || exit 1
+
+for SCRIPT in *
+do
+    if [ -x "$SCRIPT" ]
+    then
+        printf "${blue}[LAUNCH]${term_color} '%s'\n" "$SCRIPT"
+
+        START=$(date +%s)
+        ./"$SCRIPT"
+        RETURN_CODE=$?
+        DURATION=$(( $(date +%s) - START ))
+        
+        if [ "$RETURN_CODE" -eq 0 ]
+        then
+            printf "${green}[OK]${term_color} '%s' (%s s.)\n" \
+                   "$SCRIPT" "$DURATION"
+        else
+            printf "${red_bold}[FAIL]${term_color} '%s' (%s s.)\n" \
+                   "$SCRIPT" "$DURATION"
+            exit 1
+        fi
+    fi
+done

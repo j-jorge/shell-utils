@@ -3,6 +3,9 @@
 [ -z "$ISCOOL_COLORS_INCLUDED" ] || return 0
 ISCOOL_COLORS_INCLUDED=1
 
+blue="\e[0;34m"
+blue_bold="\e[1;34m"
+
 green="\e[0;32m"
 green_bold="\e[1;32m"
 

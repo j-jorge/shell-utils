@@ -1,0 +1,20 @@
+#!/bin/bash
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/colors.sh"
+
+git status --porcelain \
+    | grep '^ \?M' \
+    | sed 's/^...//' \
+    | while read -r F
+    do
+        git log -1 --oneline "$F" \
+            | (
+                read -r HASH MESSAGE
+                printf "${yellow}%s${term_color}\t%s\t%s\n" \
+                       "$HASH" \
+                       "$MESSAGE" \
+                       "$F"
+              )
+    done \
+        | sort -k2

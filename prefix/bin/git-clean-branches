@@ -1,0 +1,64 @@
+#!/bin/bash
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/colors.sh"
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/options.sh"
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/temporaries.sh"
+
+PROJECT=
+
+set_project()
+{
+    PROJECT="$1"
+}
+
+register_option '--project=<code>' set_project "JIRA's project code to clean."
+extract_parameters "$@"
+
+if [ -z "$PROJECT" ]
+then
+    (
+        printf "No project given, missing --project=<code>."
+        printf " See --help for details.\n"
+    ) >&2
+    exit 1
+fi
+
+list_all_branches()
+{
+    git branch -a \
+    | sed 's:remotes/origin/::' \
+    | grep "$PROJECT-[0-9]*" \
+    | sort \
+    | uniq
+}
+
+COUNT=$(list_all_branches | wc -l)
+CURRENT=1
+
+JIRA_DESC=$(make_temporary_file)
+
+list_all_branches \
+    | while read -r T
+    do
+        TICKET=$(echo "$T" | grep -o "$PROJECT-[0-9]*")
+        jira-list.sh "$TICKET" > "$JIRA_DESC"
+
+        printf "Checking '%s' (%s/%s)…" "$T" "$CURRENT" "$COUNT"
+        CURRENT=$(( CURRENT + 1 ))
+        
+        STATUS=$(grep ^Status < "$JIRA_DESC" | cut -d' ' -f2-)
+
+        if [ "$STATUS" = "Done" ]
+        then
+            printf "\n${green}Deleting${term_color} branch %s…\n" "$T"
+            git push origin :"$T" 2>/dev/null
+            git branch -D "$T" 2>/dev/null
+        else
+            printf " ${yellow}Skipping.${term_color} Status is '%s'\n" "$STATUS"
+            head -n 1 "$JIRA_DESC"
+        fi
+    done
+
+git fetch origin --prune

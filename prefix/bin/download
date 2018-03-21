@@ -1,0 +1,156 @@
+#!/bin/bash
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/options.sh"
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/temporaries.sh"
+
+URL=""
+TARGET_FILE=""
+EXPECTED_MIME_TYPE=""
+SKIP_SIZE_TEST=0
+: "${ISCOOL_DOWNLOAD_CACHE:=$HOME/.cache/iscool/downloads}"
+VERBOSE=0
+VERBOSE_ARG=
+
+set_url()
+{
+    URL="$1"
+}
+
+register_option '--url=<url>' set_url "The URL of the file to download."
+
+set_target()
+{
+    TARGET_FILE="$1"
+}
+
+register_option '--target-file=<path>' set_target \
+                "Where to save the downloaded file."
+
+set_mime_type()
+{
+    EXPECTED_MIME_TYPE="$1"
+}
+
+register_option '--mime-type=<type>' set_mime_type \
+                "The expected MIME type of the downloaded file."
+
+set_skip_size_flag()
+{
+    SKIP_SIZE_TEST=1
+}
+
+register_option '--skip-size-test' set_skip_size_flag \
+                "Disable the validation of the downloaded file's size."
+
+set_verbose_flag()
+{
+    VERBOSE=1
+    VERBOSE_ARG=-v
+}
+
+register_option '--verbose' set_verbose_flag \
+                "Tells the script to say what it does."
+
+extract_parameters "$@"
+
+if [ -z "$URL" ]
+then
+    printf "%s: --url is not set.\n" "$0" >&2
+    exit 1
+fi  
+
+if [ -z "$TARGET_FILE" ]
+then
+    printf "%s: --target-file is not set.\n" "$0" >&2
+    exit 1
+fi  
+
+if [ -z "$EXPECTED_MIME_TYPE" ]
+then
+    printf "%s: --mime-type is not set.\n" "$0" >&2
+    exit 1
+fi  
+
+CACHED_DOWNLOAD="$ISCOOL_DOWNLOAD_CACHE"/$(basename "$TARGET_FILE")
+
+get_mime_type()
+{
+    file --mime-type --brief --dereference "$1"
+}
+
+get_remote_file_header()
+{
+    curl -L -s -I "$1" | tr -d '\r' | grep "$2: " | cut -d' ' -f2
+}
+
+get_remote_file_size()
+{
+    RESULT=$(get_remote_file_header "$1" "Content-Length")
+
+    [ ! -z "$RESULT" ] || RESULT=0
+        
+    printf '%s' $RESULT
+}
+
+up_to_date()
+{
+    [ -f "$1" ] \
+        && [ "$(get_mime_type "$1")" = "$EXPECTED_MIME_TYPE" ] \
+        && ( [ $SKIP_SIZE_TEST = 1 ] \
+                 || [ "$(get_remote_file_size "$URL")" = "$(wc -c < "$1")" ] )
+}
+
+link_file()
+{
+    ln -f -s "$CACHED_DOWNLOAD" "$TARGET_FILE"
+}
+
+[ "$VERBOSE" -ge 1 ] \
+    && printf "Downloading '%s' of type '%s' from '%s'\n" \
+              "$TARGET_FILE" "$EXPECTED_MIME_TYPE" "$URL"
+
+if up_to_date "$TARGET_FILE"
+then
+    [ "$VERBOSE" -ge 1 ] \
+        && printf "File '%s' is up to date. Skipping.\n" "$TARGET_FILE"
+    exit 0
+fi
+
+TARGET_DIR=$(dirname "$TARGET_FILE")
+[ -d "$TARGET_DIR" ] || mkdir $VERBOSE_ARG -p "$TARGET_DIR" || exit 1
+
+if up_to_date "$CACHED_DOWNLOAD"
+then
+    [ "$VERBOSE" -ge 1 ] \
+        && printf "File '%s' found in download cache. Linking.\n" "$TARGET_FILE"
+    link_file
+    exit 0
+fi
+    
+TEMP_FILE=$(make_temporary_file)
+
+
+if [ "$VERBOSE" -ge 1 ]
+then
+    CURL_VERBOSE_ARG=--verbose
+else
+    CURL_VERBOSE_ARG=--silent
+fi
+
+curl $CURL_VERBOSE_ARG -L -o "$TEMP_FILE" "$URL" || exit 1
+TEMP_FILE_MIME_TYPE=$(get_mime_type "$TEMP_FILE")
+
+if [ "$TEMP_FILE_MIME_TYPE" = "$EXPECTED_MIME_TYPE" ]
+then
+    [ -d "$ISCOOL_DOWNLOAD_CACHE" ] \
+        || mkdir $VERBOSE_ARG -p "$ISCOOL_DOWNLOAD_CACHE"
+    
+    mv $VERBOSE_ARG "$TEMP_FILE" "$CACHED_DOWNLOAD"
+    link_file
+else
+    printf "Downloaded file type is invalid: Got '%s', want '%s'.\n" \
+           "$TEMP_FILE_MIME_TYPE" "$EXPECTED_MIME_TYPE" >&2
+    exit 1
+fi

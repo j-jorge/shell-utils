@@ -10,5 +10,12 @@ is_osx()
 
 cpu_count()
 {
-    ( is_osx && echo $(( $(sysctl -n hw.ncpu) - 1 )) ) || nproc
+    ( is_osx && echo $(( $(sysctl -n hw.ncpu) - 1 )) )\
+        || nproc
+}
+
+host_architecture()
+{
+    ( is_osx && (sysctl hw.machine | cut -d " " -f 2) ) \
+          || (uname -p | sed 's/^i[3-6]/x/')
 }

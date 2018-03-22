@@ -7,3 +7,8 @@ is_osx()
 {
     uname -s | grep -q Darwin
 }
+
+cpu_count()
+{
+    ( is_osx && echo $(( $(sysctl -n hw.ncpu) - 1 )) ) || nproc
+}

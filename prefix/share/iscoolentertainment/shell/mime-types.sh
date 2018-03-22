@@ -8,6 +8,10 @@ ISCOOL_MIME_TYPES_INCLUDED=1
 mime_type_name()
 {
     case "$1" in
+        bin)
+            is_osx && echo "application/x-mach-binary" \
+                    || echo "application/x-executable"
+            ;;
         gzip)
             is_osx && echo "application/x-gzip" || echo "application/gzip"
             ;;

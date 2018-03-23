@@ -48,4 +48,9 @@ extract_parameters --long=22 --long-flag -s222 -f
 [ "$SHORT_VALUE" = 222 ] || test_failed $LINENO
 [ "$SHORT_FLAG" = 10 ] || test_failed $LINENO
 
+extract_parameters --long 44 -s 444
+
+[ "$LONG_VALUE" = 44 ] || test_failed $LINENO
+[ "$SHORT_VALUE" = 444 ] || test_failed $LINENO
+
 test_end

@@ -198,13 +198,19 @@ print_help ()
 
 option_panic_no_args ()
 {
-    echo "ERROR: Option '$1' does not take arguments. See --help for usage."
+    printf "%s: ERROR: Option '%s' does not take arguments." \
+           "$PROGNAME" "$1" >&2
+    printf " See --help for usage.\n" >&2
+           
     exit 1
 }
 
 option_panic_missing_arg ()
 {
-    echo "ERROR: Option '$1' requires an argument. See --help for usage."
+    printf "%s: ERROR: Option '%s' requires an argument." \
+           "$PROGNAME" "$1" >&2
+    printf " See --help for usage.\n" >&2
+
     exit 1
 }
 
@@ -259,11 +265,11 @@ extract_parameters ()
                 break
             fi
 
-            echo "ERROR: Unknown option '$1'. Use --help for list of valid values."
+            printf "%s: ERROR: Unknown option '%s'." "$PROGNAME" "$1" >&2
+            printf " Use --help for list of valid values.\n" >&2
+            
             exit 1
         done
-
-        #echo "Found opt='$opt' otype='$otype' value='$value'"
 
         name=`dashes_to_underscores $opt`
         found=0
@@ -278,30 +284,24 @@ extract_parameters ()
             xotype=`option_get_attr $name otype`
             if [ "$otype" != "$xotype" ] ; then
                 case "$xotype" in
-                "short_flag")
+                "short_flag"|"long_flag")
                     option_panic_no_args $opt
                     ;;
-                "short_setting")
+                "short_setting"|"long_setting")
                     if [ -z "$2" ] ; then
                         option_panic_missing_arg $opt
                     fi
                     value="$2"
                     shift
                     ;;
-                "long_flag")
-                    option_panic_no_args $opt
-                    ;;
-                "long_setting")
-                    option_panic_missing_arg $opt
-                    ;;
                 esac
             fi
             found=1
             break
-            break
         done
         if [ "$found" = "0" ] ; then
-            echo "ERROR: Unknown option '$opt'. See --help for usage."
+            printf "%s: ERROR: Unknown option '%s'. See --help for usage.\n" \
+                   "$PROGNAME" "$opt" >&2
             exit 1
         fi
         # Launch option-specific function, value, if any as argument

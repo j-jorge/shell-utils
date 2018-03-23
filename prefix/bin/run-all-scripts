@@ -6,26 +6,24 @@ INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 if [ "$1" = "--help" ]
 then
-    printf "Usage: %s directory\n" "$0"
+    printf "Usage: %s script…\n" "$0"
     exit 0
 fi
 
-if [ ! -d "$1" ]
+if [ "$#" = 0 ]
 then
-    printf "error: '%s' is not a directory.\n" "$1" >&2
+    printf "No script given.\n" >&2
     exit 1
 fi
 
-cd "$1" || exit 1
-
-for SCRIPT in *
+for SCRIPT in "$@"
 do
     if [ -x "$SCRIPT" ]
     then
         printf "${blue}[LAUNCH]${term_color} '%s'\n" "$SCRIPT"
 
         START=$(date +%s)
-        ./"$SCRIPT"
+        "$SCRIPT"
         RETURN_CODE=$?
         DURATION=$(( $(date +%s) - START ))
         

@@ -16,7 +16,7 @@ MIME_TYPE=$(file --mime "$REFERENCE" | cut -d' ' -f2 | tr -d ';')
 CACHE="$TMP_DIR/cache/"
 mkdir "$CACHE"
 ISCOOL_DOWNLOAD_CACHE="$CACHE" \
-                     "$INCLUDE_ROOT/usr/bin/download" \
+                     "$INCLUDE_ROOT/bin/download" \
                          --url="$URL" \
                          --mime-type="$MIME_TYPE" \
                          --target-file="$TARGET" \

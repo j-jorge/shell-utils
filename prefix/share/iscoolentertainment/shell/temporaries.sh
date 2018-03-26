@@ -9,9 +9,12 @@ trap 'cat $IC_TEMP_FILES | xargs rm -f -r $IC_TEMP_FILES' EXIT
 
 make_temporary_file()
 {
+    local PREFIX="$1"
     local RESULT
 
-    RESULT=$(mktemp /tmp/tmp.XXXXXXXXXX)
+    [ -n "$PREFIX" ] || PREFIX=/tmp/tmp.XXXXXXXXXX
+    
+    RESULT=$(mktemp "$PREFIX")
     echo "$RESULT" >> "$IC_TEMP_FILES"
     
     echo "$RESULT"
@@ -19,9 +22,12 @@ make_temporary_file()
 
 make_temporary_directory()
 {
+    local PREFIX="$1"
     local RESULT
 
-    RESULT=$(mktemp -d /tmp/tmp.XXXXXXXXXX)
+    [ -n "$PREFIX" ] || PREFIX=/tmp/tmp.XXXXXXXXXX
+    
+    RESULT=$(mktemp -d "$PREFIX")
     echo "$RESULT" >> "$IC_TEMP_FILES"
     
     echo "$RESULT"

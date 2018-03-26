@@ -114,8 +114,7 @@ register_option ()
     opttype=
     while true ; do
         # Check for something like --setting=<value>
-        echo "$1" | grep -q -E -e '^--[^=]+=<.+>$'
-        if [ $? = 0 ] ; then
+        if echo "$1" | grep -q -E -e '^--[^=]+=<.+>$' ; then
             optlabel=`expr -- "$1" : '\(--[^=]*\)=.*'`
             optvalue=`expr -- "$1" : '--[^=]*=\(<.*>\)'`
             opttype="long_setting"
@@ -123,16 +122,14 @@ register_option ()
         fi
 
         # Check for something like --flag
-        echo "$1" | grep -q -E -e '^--[^=]+$'
-        if [ $? = 0 ] ; then
+        if echo "$1" | grep -q -E -e '^--[^=]+$' ; then
             optlabel="$1"
             opttype="long_flag"
             break
         fi
 
         # Check for something like -f<value>
-        echo "$1" | grep -q -E -e '^-[A-Za-z0-9]<.+>$'
-        if [ $? = 0 ] ; then
+        if echo "$1" | grep -q -E -e '^-[A-Za-z0-9]<.+>$' ; then
             optlabel=`expr -- "$1" : '\(-.\).*'`
             optvalue=`expr -- "$1" : '-.\(<.+>\)'`
             opttype="short_setting"
@@ -140,8 +137,7 @@ register_option ()
         fi
 
         # Check for something like -f
-        echo "$1" | grep -q -E -e '^-.$'
-        if [ $? = 0 ] ; then
+        if echo "$1" | grep -q -E -e '^-.$' ; then
             optlabel="$1"
             opttype="short_flag"
             break

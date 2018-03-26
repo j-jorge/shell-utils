@@ -10,7 +10,7 @@ is_osx()
 
 cpu_count()
 {
-    ( is_osx && echo $(( $(sysctl -n hw.ncpu) - 1 )) )\
+    ( is_osx && sysctl -n hw.ncpu ) \
         || nproc
 }
 

@@ -3,16 +3,16 @@
 [ -z "$ISCOOL_COLORS_INCLUDED" ] || return 0
 ISCOOL_COLORS_INCLUDED=1
 
-blue="\e[0;34m"
-blue_bold="\e[1;34m"
+blue="\033[0;34m"
+blue_bold="\033[1;34m"
 
-green="\e[0;32m"
-green_bold="\e[1;32m"
+green="\033[0;32m"
+green_bold="\033[1;32m"
 
-red="\e[0;31m"
-red_bold="\e[1;31m"
+red="\033[0;31m"
+red_bold="\033[1;31m"
 
-yellow="\e[0;33m"
-yellow_bold="\e[1;33m"
+yellow="\033[0;33m"
+yellow_bold="\033[1;33m"
 
-term_color="\e[0;0m"
+term_color="\033[0;0m"

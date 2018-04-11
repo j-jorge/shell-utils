@@ -217,7 +217,7 @@ extract_parameters ()
     while [ -n "$1" ] ; do
         # If the parameter does not begin with a dash
         # it is not an option.
-        param=`expr -- "$1" : '^\([^\-].*\)$'`
+        param=$(expr -- "$1" : '^\([^\-].*\)$' || true)
         if [ -n "$param" ] ; then
             if [ -z "$PARAMETERS" ] ; then
                 PARAMETERS="$1"
@@ -230,15 +230,15 @@ extract_parameters ()
 
         while true ; do
             # Try to match a long setting, i.e. --option=value
-            opt=`expr -- "$1" : '^\(--[^=]*\)=.*$'`
+            opt=$(expr -- "$1" : '^\(--[^=]*\)=.*$' || true)
             if [ -n "$opt" ] ; then
                 otype="long_setting"
-                value=`expr -- "$1" : '^--[^=]*=\(.*\)$'`
+                value=$(expr -- "$1" : '^--[^=]*=\(.*\)$' || true)
                 break
             fi
 
             # Try to match a long flag, i.e. --option
-            opt=`expr -- "$1" : '^\(--.*\)$'`
+            opt=$(expr -- "$1" : '^\(--.*\)$' || true)
             if [ -n "$opt" ] ; then
                 otype="long_flag"
                 value=
@@ -246,15 +246,15 @@ extract_parameters ()
             fi
 
             # Try to match a short setting, i.e. -o<value>
-            opt=`expr -- "$1" : '^\(-[A-Za-z0-9]\)..*$'`
+            opt=$(expr -- "$1" : '^\(-[A-Za-z0-9]\)..*$' || true)
             if [ -n "$opt" ] ; then
                 otype="short_setting"
-                value=`expr -- "$1" : '^-.\(.*\)$'`
+                value=$(expr -- "$1" : '^-.\(.*\)$' || true)
                 break
             fi
 
             # Try to match a short flag, i.e. -o
-            opt=`expr -- "$1" : '^\(-.\)$'`
+            opt=$(expr -- "$1" : '^\(-.\)$' || true)
             if [ -n "$opt" ] ; then
                 otype="short_flag"
                 value=

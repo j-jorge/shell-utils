@@ -18,7 +18,7 @@ fi
 
 for SCRIPT in "$@"
 do
-    if [ -x "$SCRIPT" ]
+    if [ -x "$SCRIPT" ] && [ -f "$SCRIPT" ]
     then
         printf "${blue}[LAUNCH]${term_color} '%s'\n" "$SCRIPT"
 

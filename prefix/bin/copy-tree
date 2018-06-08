@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -e
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/options.sh"
+
+INPUT_DIR=
+OUTPUT_DIR=
+VERBOSE=0
+RSYNC_ARGS=("--inplace" "--copy-links" "--recursive" "--relative")
+
+set_verbose()
+{
+    VERBOSE=1
+    RSYNC_ARGS+=("-v")
+}
+
+register_option '--verbose' set_verbose \
+                "Print more details about the executed operations."
+
+set_input_dir()
+{
+    INPUT_DIR="$1"
+}
+
+register_option '--from=<path>' set_input_dir \
+                "The directory to copy from."
+
+set_output_dir()
+{
+    OUTPUT_DIR="$1"
+}
+
+register_option '--to=<path>' set_output_dir \
+                "The directory to copy to."
+
+enable_update_mode()
+{
+    RSYNC_ARGS+=("-u")
+}
+
+register_option '--update' enable_update_mode \
+                "Keep the files newer in the target directory."
+
+enable_new_files_mode()
+{
+    RSYNC_ARGS+=("--ignore-existing")
+}
+
+register_option '--new' enable_new_files_mode \
+                "Copy only the files that do not exist in the destination."
+
+extract_parameters "$@"
+
+check_option_is_set "--from" "$INPUT_DIR"
+check_option_is_set "--to" "$OUTPUT_DIR"
+
+if [ ! -d "$INPUT_DIR" ]
+then
+    [ "$VERBOSE" -eq 0 ] \
+        || printf "Source directory '%s' does not exist.\n" "$INPUT_DIR"
+    exit 0;
+fi
+
+[ "$VERBOSE" -eq 0 ] \
+    || printf "Copying '%s' in '%s'.\n" "$INPUT_DIR" "$OUTPUT_DIR"
+        
+cd "$INPUT_DIR"
+
+rsync "${RSYNC_ARGS[@]}" . "$OUTPUT_DIR"

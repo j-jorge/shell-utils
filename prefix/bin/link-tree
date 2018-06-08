@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -e
+
+INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+. "$INCLUDE_ROOT/share/iscoolentertainment/shell/options.sh"
+
+INPUT_DIR=
+OUTPUT_DIR=
+VERBOSE=0
+VERBOSE_ARG=
+
+set_verbose()
+{
+    VERBOSE=1
+    VERBOSE_ARG=-v
+}
+
+register_option '--verbose' set_verbose \
+                "Print more details about the executed operations."
+
+set_input_dir()
+{
+    INPUT_DIR="$1"
+}
+
+register_option '--from=<path>' set_input_dir \
+                "The directory to copy from."
+
+set_output_dir()
+{
+    OUTPUT_DIR="$1"
+}
+
+register_option '--to=<path>' set_output_dir \
+                "The directory to copy to."
+
+extract_parameters "$@"
+
+check_option_is_set "--from" "$INPUT_DIR"
+check_option_is_set "--to" "$OUTPUT_DIR"
+
+link_tree()
+{
+    pushd "$1" > /dev/null
+
+    find . -mindepth 1 -maxdepth 1 \
+        | while read -r FILE
+    do
+        local TARGET="$2/$FILE"
+
+        if [ -d "$FILE" ] && [ -d "$TARGET" ]
+        then
+            link_tree "$FILE" "$TARGET"
+        else
+            [ ! -e "$TARGET" ] || rm -r $VERBOSE_ARG "$TARGET"
+            
+            ln $VERBOSE_ARG -s -f "$PWD/$FILE" "$TARGET"
+        fi
+    done
+
+    popd > /dev/null
+}
+
+if [ ! -d "$INPUT_DIR" ]
+then
+    [ "$VERBOSE" -eq 0 ] \
+        || printf "Source directory '%s' does not exist.\n" "$INPUT_DIR"
+    exit 0;
+fi
+
+[ "$VERBOSE" -eq 0 ] \
+    || printf "Linking '%s' files in '%s'.\n" "$INPUT_DIR" "$OUTPUT_DIR"
+
+link_tree "$INPUT_DIR" "$OUTPUT_DIR"
+

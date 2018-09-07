@@ -33,8 +33,13 @@ test_tree()
 
     [ -L "$DESTINATION/.hidden" ] || test_failed $LINENO
     [ -L "$DESTINATION/linked" ] || test_failed $LINENO
-    [ -L "$DESTINATION/d" ] || test_failed $LINENO
-    [ -L "$DESTINATION/e" ] || test_failed $LINENO
+    [ -d "$DESTINATION/d" ] || test_failed $LINENO
+    [ -L "$DESTINATION/d/.hidden" ] || test_failed $LINENO
+    [ -d "$DESTINATION/e" ] || test_failed $LINENO
+    [ -d "$DESTINATION/e/f" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/1" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/2" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/link" ] || test_failed $LINENO
 }
 
 keep_existing_directories()
@@ -62,9 +67,12 @@ keep_existing_directories()
     diff -r "$SOURCE" "$DESTINATION" || test_failed $LINENO
 
     [ -L "$DESTINATION/.hidden" ] || test_failed $LINENO
-    [ -L "$DESTINATION/d" ] || test_failed $LINENO
+    [ -d "$DESTINATION/d" ] || test_failed $LINENO
+    [ -L "$DESTINATION/d/.hidden" ] || test_failed $LINENO
     [ -d "$DESTINATION/e" ] || test_failed $LINENO
-    [ -L "$DESTINATION/e/f" ] || test_failed $LINENO
+    [ -d "$DESTINATION/e/f" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/1" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/2" ] || test_failed $LINENO
 }
 
 non_matching_destination_types()
@@ -92,14 +100,18 @@ non_matching_destination_types()
 
     diff -r "$SOURCE" "$DESTINATION" || test_failed $LINENO
 
+    [ -L "$DESTINATION/1" ] || test_failed $LINENO
     [ -L "$DESTINATION/.hidden" ] || test_failed $LINENO
-    [ -L "$DESTINATION/linked" ] || test_failed $LINENO
-    [ -L "$DESTINATION/d" ] || test_failed $LINENO
+    [ -d "$DESTINATION/d" ] || test_failed $LINENO
+    [ -L "$DESTINATION/d/.hidden" ] || test_failed $LINENO
     [ -d "$DESTINATION/e" ] || test_failed $LINENO
-    [ -L "$DESTINATION/e/f" ] || test_failed $LINENO
+    [ -d "$DESTINATION/e/f" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/1" ] || test_failed $LINENO
+    [ -L "$DESTINATION/e/f/2" ] || test_failed $LINENO
 }
 
 test_tree
 keep_existing_directories
+non_matching_destination_types
 
 test_end

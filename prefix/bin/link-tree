@@ -50,8 +50,14 @@ link_tree()
     do
         local TARGET="$2/$FILE"
 
-        if [ -d "$FILE" ] && [ -d "$TARGET" ]
+        if [ -d "$FILE" ]
         then
+            if  [ ! -d "$TARGET" ]
+            then
+                rm -f $VERBOSE_ARG "$TARGET"
+                mkdir "$TARGET"
+            fi
+
             link_tree "$FILE" "$TARGET"
         else
             [ ! -e "$TARGET" ] || rm -r $VERBOSE_ARG "$TARGET"

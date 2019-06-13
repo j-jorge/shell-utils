@@ -112,11 +112,19 @@ register_option ()
     optname=
     optvalue=
     opttype=
+    optarray=
     while true ; do
         # Check for something like --setting=<value>
         if echo "$1" | grep -q -E -e '^--[^=]+=<.+>$' ; then
             optlabel=`expr -- "$1" : '\(--[^=]*\)=.*'`
             optvalue=`expr -- "$1" : '--[^=]*=\(<.*>\)'`
+
+            if expr -- "$1" : '--[^=]*=<.*\(…\)>' >/dev/null; then
+                optarray=1
+            else
+                optarray=
+            fi
+            
             opttype="long_setting"
             break
         fi
@@ -124,6 +132,7 @@ register_option ()
         # Check for something like --flag
         if echo "$1" | grep -q -E -e '^--[^=]+$' ; then
             optlabel="$1"
+            optarray=
             opttype="long_flag"
             break
         fi
@@ -132,6 +141,7 @@ register_option ()
         if echo "$1" | grep -q -E -e '^-[A-Za-z0-9]<.+>$' ; then
             optlabel=`expr -- "$1" : '\(-.\).*'`
             optvalue=`expr -- "$1" : '-.\(<.+>\)'`
+            optarray=
             opttype="short_setting"
             break
         fi
@@ -139,6 +149,7 @@ register_option ()
         # Check for something like -f
         if echo "$1" | grep -q -E -e '^-.$' ; then
             optlabel="$1"
+            optarray=
             opttype="short_flag"
             break
         fi
@@ -153,6 +164,7 @@ register_option ()
     OPTIONS_TEXT="$OPTIONS_TEXT $1"
     option_set_attr $optname label "$optlabel"
     option_set_attr $optname otype "$opttype"
+    option_set_attr $optname oarray "$optarray"
     option_set_attr $optname value "$optvalue"
     option_set_attr $optname text "$1"
     option_set_attr $optname funcname "$2"
@@ -212,14 +224,18 @@ option_panic_missing_arg ()
 
 extract_parameters ()
 {
-    local opt optname otype value name funcname
+    local opt optname otype value name funcname in_array
     PARAMETERS=""
+
     while [ -n "$1" ] ; do
         # If the parameter does not begin with a dash
         # it is not an option.
         param=$(expr -- "$1" : '^\([^\-].*\)$' || true)
         if [ -n "$param" ] ; then
-            if [ -z "$PARAMETERS" ] ; then
+            if [ -n "$in_array" ]; then
+                # Launch option-specific function, value, if any as argument
+                eval `option_get_attr $name funcname` \"$param\"
+            elif [ -z "$PARAMETERS" ] ; then
                 PARAMETERS="$1"
             else
                 PARAMETERS="$PARAMETERS $1"
@@ -293,6 +309,8 @@ extract_parameters ()
                 esac
             fi
             found=1
+
+            in_array=`option_get_attr $name oarray`
             break
         done
         if [ "$found" = "0" ] ; then

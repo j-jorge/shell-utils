@@ -3,6 +3,7 @@
 INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 . "$INCLUDE_ROOT/share/iscoolentertainment/shell/colors.sh"
 
+HEAD_HASH="$(git rev-parse --short HEAD)"
 git status --porcelain \
     | grep '^ \?M' \
     | sed 's/^...//' \
@@ -11,10 +12,16 @@ git status --porcelain \
         git log -1 --oneline "$F" \
             | (
                 read -r HASH MESSAGE
+
+                if [ "$HASH" == "$HEAD_HASH" ]
+                then
+                    HASH="HEAD"
+                fi
+                
                 printf "${yellow}%s${term_color}\t%s\t%s\n" \
                        "$HASH" \
                        "$MESSAGE" \
                        "$F"
               )
     done \
-        | sort -k2
+        | sort -k1

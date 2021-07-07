@@ -4,12 +4,15 @@ INCLUDE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 . "$INCLUDE_ROOT/share/iscoolentertainment/shell/colors.sh"
 
 HEAD_HASH="$(git rev-parse --short HEAD)"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
 git status --porcelain \
     | grep '^ \?M' \
     | sed 's/^...//' \
     | while read -r F
     do
-        git log -1 --oneline "$F" \
+        F="$(realpath --relative-to="$PWD" "$REPO_ROOT/$F")"
+        git log -1 --oneline -- "$F" \
             | (
                 read -r HASH MESSAGE
 
@@ -17,7 +20,7 @@ git status --porcelain \
                 then
                     HASH="HEAD"
                 fi
-                
+
                 printf "${yellow}%s${term_color}\t%s\t%s\n" \
                        "$HASH" \
                        "$MESSAGE" \

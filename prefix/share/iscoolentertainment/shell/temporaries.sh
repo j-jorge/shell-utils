@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -z "$ISCOOL_TEMPORARIES_INCLUDED" ] || return 0
+[ -z "${ISCOOL_TEMPORARIES_INCLUDED:-}" ] || return 0
 ISCOOL_TEMPORARIES_INCLUDED=1
 
 export IC_TEMP_FILES=$(mktemp /tmp/tmp.XXXXXXXXXX)
@@ -13,22 +13,22 @@ make_temporary_file()
     local RESULT
 
     [ -n "$PREFIX" ] || PREFIX=/tmp/tmp.XXXXXXXXXX
-    
+
     RESULT=$(mktemp "$PREFIX")
     echo "$RESULT" >> "$IC_TEMP_FILES"
-    
+
     echo "$RESULT"
 }
 
 make_temporary_directory()
 {
-    local PREFIX="$1"
+    local PREFIX="${1:-}"
     local RESULT
 
     [ -n "$PREFIX" ] || PREFIX=/tmp/tmp.XXXXXXXXXX
-    
+
     RESULT=$(mktemp -d "$PREFIX")
     echo "$RESULT" >> "$IC_TEMP_FILES"
-    
+
     echo "$RESULT"
 }

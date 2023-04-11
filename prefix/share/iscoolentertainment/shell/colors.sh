@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ -z "$ISCOOL_COLORS_INCLUDED" ] || return 0
+[ -z "${ISCOOL_COLORS_INCLUDED:-}" ] || return 0
 ISCOOL_COLORS_INCLUDED=1
 
 [ -t 1 ] || return 0

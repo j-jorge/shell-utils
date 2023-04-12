@@ -22,7 +22,7 @@
 # from the Android NDK
 #
 
-[ -z "$ISCOOL_OPTIONS_INCLUDED" ] || return 0
+[ -z "${ISCOOL_OPTIONS_INCLUDED:-}" ] || return 0
 ISCOOL_OPTIONS_INCLUDED=1
 
 # Current script name into PROGNAME
@@ -124,7 +124,7 @@ register_option ()
             else
                 optarray=
             fi
-            
+
             opttype="long_setting"
             break
         fi
@@ -161,7 +161,7 @@ register_option ()
 
     optname=`dashes_to_underscores $optlabel`
     OPTIONS="$OPTIONS $optname"
-    OPTIONS_TEXT="$OPTIONS_TEXT $1"
+    OPTIONS_TEXT="${OPTIONS_TEXT:-} $1"
     option_set_attr $optname label "$optlabel"
     option_set_attr $optname otype "$opttype"
     option_set_attr $optname oarray "$optarray"
@@ -169,7 +169,7 @@ register_option ()
     option_set_attr $optname text "$1"
     option_set_attr $optname funcname "$2"
     option_set_attr $optname abstract "$3"
-    option_set_attr $optname default "$4"
+    option_set_attr $optname default "${4:-}"
 }
 
 # Print the help, including a list of registered options for this program
@@ -209,7 +209,7 @@ option_panic_no_args ()
     printf "%s: ERROR: Option '%s' does not take arguments." \
            "$PROGNAME" "$1" >&2
     printf " See --help for usage.\n" >&2
-           
+
     exit 1
 }
 
@@ -227,7 +227,7 @@ extract_parameters ()
     local opt optname otype value name funcname in_array
     PARAMETERS=""
 
-    while [ -n "$1" ] ; do
+    while [ -n "${1:-}" ] ; do
         # If the parameter does not begin with a dash
         # it is not an option.
         param=$(expr -- "$1" : '^\([^\-].*\)$' || true)
@@ -279,7 +279,7 @@ extract_parameters ()
 
             printf "%s: ERROR: Unknown option '%s'." "$PROGNAME" "$1" >&2
             printf " Use --help for list of valid values.\n" >&2
-            
+
             exit 1
         done
 

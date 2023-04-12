@@ -9,7 +9,7 @@ trap 'cat $IC_TEMP_FILES | xargs rm -f -r $IC_TEMP_FILES' EXIT
 
 make_temporary_file()
 {
-    local PREFIX="$1"
+    local PREFIX="${1:-}"
     local RESULT
 
     [ -n "$PREFIX" ] || PREFIX=/tmp/tmp.XXXXXXXXXX

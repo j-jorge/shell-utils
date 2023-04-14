@@ -180,9 +180,9 @@ print_help ()
 {
     local opt text abstract default
 
-    echo "Usage: $PROGNAME [options] $PROGRAM_PARAMETERS"
+    echo "Usage: $PROGNAME [options] ${PROGRAM_PARAMETERS:-}"
     echo ""
-    if [ -n "$PROGRAM_DESCRIPTION" ] ; then
+    if [ -n "${PROGRAM_DESCRIPTION:-}" ] ; then
         echo "$PROGRAM_DESCRIPTION"
         echo ""
     fi

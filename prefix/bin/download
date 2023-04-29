@@ -59,19 +59,19 @@ if [ -z "$URL" ]
 then
     printf "%s: --url is not set.\n" "$0" >&2
     exit 1
-fi  
+fi
 
 if [ -z "$TARGET_FILE" ]
 then
     printf "%s: --target-file is not set.\n" "$0" >&2
     exit 1
-fi  
+fi
 
 if [ -z "$EXPECTED_MIME_TYPE" ]
 then
     printf "%s: --mime-type is not set.\n" "$0" >&2
     exit 1
-fi  
+fi
 
 CACHED_DOWNLOAD="$ISCOOL_DOWNLOAD_CACHE"/$(basename "$TARGET_FILE")
 
@@ -90,7 +90,7 @@ get_remote_file_size()
     RESULT=$(get_remote_file_header "$1" "Content-Length")
 
     [ ! -z "$RESULT" ] || RESULT=0
-        
+
     printf '%s' $RESULT
 }
 
@@ -128,7 +128,7 @@ then
     link_file
     exit 0
 fi
-    
+
 TEMP_FILE=$(make_temporary_file)
 
 
@@ -139,14 +139,19 @@ else
     CURL_VERBOSE_ARG=--silent
 fi
 
-curl $CURL_VERBOSE_ARG -L -o "$TEMP_FILE" "$URL" || exit 1
+curl $CURL_VERBOSE_ARG -L -o "$TEMP_FILE" "$URL" \
+    || {
+    echo "Failed to download '$URL'" >&2
+    exit 1
+}
+
 TEMP_FILE_MIME_TYPE=$(get_mime_type "$TEMP_FILE")
 
 if [ "$TEMP_FILE_MIME_TYPE" = "$EXPECTED_MIME_TYPE" ]
 then
     [ -d "$ISCOOL_DOWNLOAD_CACHE" ] \
         || mkdir $VERBOSE_ARG -p "$ISCOOL_DOWNLOAD_CACHE"
-    
+
     mv $VERBOSE_ARG "$TEMP_FILE" "$CACHED_DOWNLOAD"
     link_file
 else

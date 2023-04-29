@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -z "$ISCOOL_MIME_TYPES_INCLUDED" ] || return 0
+[ -z "${ISCOOL_MIME_TYPES_INCLUDED:-}" ] || return 0
 ISCOOL_MIME_TYPES_INCLUDED=1
 
 . "$(dirname "${BASH_SOURCE[0]}")/platform.sh"

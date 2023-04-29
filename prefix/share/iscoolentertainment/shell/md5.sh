@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -z "$ISCOOL_MD5_INCLUDED" ] || return 0
+[ -z "${ISCOOL_MD5_INCLUDED:-}" ] || return 0
 ISCOOL_MD5_INCLUDED=1
 
 . "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
